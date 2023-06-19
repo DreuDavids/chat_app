@@ -1,6 +1,9 @@
 import 'package:chat_app/components/components.dart';
 import 'package:chat_app/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'chat_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String id = 'registration_screen';
@@ -11,6 +14,10 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  final _auth = FirebaseAuth.instance;
+  String email = '';
+  String password = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,8 +32,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               height: 48.0,
             ),
             TextField(
+              keyboardType: TextInputType.emailAddress,
               onChanged: (value) {
                 //Do something with the user input.
+                email = value;
               },
               decoration: kidTextFieldDecoration.copyWith(
                 hintText: 'Enter Your Email',
@@ -38,6 +47,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             TextField(
               onChanged: (value) {
                 //Do something with the user input.
+                password = value;
               },
               obscureText: true,
               decoration: kidTextFieldDecoration.copyWith(
@@ -49,9 +59,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ),
             MyTonalButton(
               title: 'Register',
-              onTap: () {
+              onTap: () async {
                 //register the user here
-                print('register user');
+                try {
+                  final newUser = await _auth.createUserWithEmailAndPassword(
+                      email: email, password: password);
+
+                  if (newUser != null && mounted) {
+                    Navigator.pushNamed(context, ChatScreen.id);
+                  }
+                } catch (e) {
+                  debugPrint(e.toString());
+                }
               },
             )
           ],
