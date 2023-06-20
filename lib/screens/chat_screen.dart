@@ -1,8 +1,8 @@
 import 'package:chat_app/constants.dart';
 import 'package:chat_app/screens/welcome_screen.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
@@ -11,7 +11,11 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
+  late final User loggedInUser;
+
+  String messageText = '';
 
   @override
   void initState() {
@@ -22,7 +26,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void getCurrentUser() {
     try {
       final user = _auth.currentUser;
-      User loggedInUser;
+
       if (user != null) {
         loggedInUser = user;
       }
@@ -36,7 +40,6 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        leading: null,
         actions: [
           IconButton(
               icon: const Icon(Icons.logout_outlined),
@@ -69,19 +72,23 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: TextField(
                       onChanged: (value) {
                         //Do something with the user input.
+                        messageText = value;
                       },
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
-                  MaterialButton(
-                    onPressed: () {
-                      //Implement send functionality.
-                    },
-                    child: const Text(
-                      'Send',
-                      style: kSendButtonTextStyle,
-                    ),
-                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        //send message
+                        _firestore.collection(messageText).add({
+                          'text': messageText,
+                          'sender': loggedInUser.email
+                        });
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        child: Icon(Icons.send_sharp),
+                      )),
                 ],
               ),
             ),
