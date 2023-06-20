@@ -66,7 +66,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       email: email, password: password);
 
                   if (newUser != null && mounted) {
-                    Navigator.pushNamed(context, ChatScreen.id);
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, ChatScreen.id, (route) => false);
                   }
                 } catch (e) {
                   debugPrint(e.toString());
